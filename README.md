@@ -19,4 +19,4 @@ AI‑powered Product Defect detection web app using Google Gemini Vision and Sup
 - History page to view past reports
   
 ## 📸 Demo Videos
-https://github.com/user-attachments/assets/9532aae5-e23b-4a52-ab08-7da94d1544b8
+https://github.com/user-attachments/assets/26278d0c-f9c2-4041-9b51-7be62f0ad5a4
