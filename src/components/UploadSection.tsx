@@ -51,10 +51,10 @@ export default function UploadSection({ onImageSelect, isAnalyzing }: UploadSect
             <Scan className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent animate-gradient">
-            AI Window Crack Detection
+            AI Product Defect Detection
           </h1>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Advanced neural network analysis for precise crack detection and window classification
+            Advanced neural network analysis for detecting defects in windows, doors, frames, sliding systems, and glass panels
           </p>
         </div>
 
@@ -88,7 +88,7 @@ export default function UploadSection({ onImageSelect, isAnalyzing }: UploadSect
 
               {isAnalyzing ? (
                 <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">Analyzing Window...</h3>
+                  <h3 className="text-2xl font-bold text-white mb-2">Analyzing Product...</h3>
                   <p className="text-gray-400">AI is processing your image</p>
                   <div className="mt-6 flex justify-center gap-2">
                     <div className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce" />
@@ -98,9 +98,9 @@ export default function UploadSection({ onImageSelect, isAnalyzing }: UploadSect
                 </div>
               ) : (
                 <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">Upload Window Image</h3>
+                  <h3 className="text-2xl font-bold text-white mb-2">Upload Product Image</h3>
                   <p className="text-gray-400 mb-8">
-                    Drag & drop your window image here, or click to browse
+                    Drag & drop your product image here, or click to browse
                   </p>
 
                   <button
@@ -121,7 +121,7 @@ export default function UploadSection({ onImageSelect, isAnalyzing }: UploadSect
 
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { title: 'AI Detection', desc: 'Advanced neural networks identify cracks with precision' },
+            { title: 'AI Detection', desc: 'Advanced neural networks identify defects with precision' },
             { title: 'Bounding Boxes', desc: 'Visual markers highlight exact damage locations' },
             { title: 'PDF Reports', desc: 'Professional documentation ready to export' },
           ].map((feature, idx) => (

@@ -1,10 +1,10 @@
 import { useRef, useEffect, useState } from 'react';
 import { Download, RotateCcw, AlertTriangle, CheckCircle, FileText } from 'lucide-react';
-import { CrackDetection } from '../lib/supabase';
+import { DefectDetection } from '../lib/supabase';
 import { generatePDFReport } from '../services/pdfGenerator';
 
 interface ResultsSectionProps {
-  detection: CrackDetection;
+  detection: DefectDetection;
   imageFile: File;
   onReset: () => void;
 }
@@ -65,7 +65,7 @@ export default function ResultsSection({ detection, imageFile, onReset }: Result
     if (!canvas) return;
 
     const link = document.createElement('a');
-    link.download = `crack_detection_${detection.id.slice(0, 8)}.png`;
+    link.download = `defect_detection_${detection.id.slice(0, 8)}.png`;
     link.href = canvas.toDataURL();
     link.click();
   };
@@ -74,7 +74,7 @@ export default function ResultsSection({ detection, imageFile, onReset }: Result
     generatePDFReport(detection, imageDataUrl);
   };
 
-  const hasCracks = detection.crack_detected;
+  const hasDefects = detection.crack_detected;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/20 to-slate-900 px-4 py-12">
@@ -87,9 +87,9 @@ export default function ResultsSection({ detection, imageFile, onReset }: Result
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className={`bg-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border ${hasCracks ? 'border-red-500/50' : 'border-green-500/50'}`}>
+          <div className={`bg-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border ${hasDefects ? 'border-red-500/50' : 'border-green-500/50'}`}>
             <div className="flex items-center gap-4 mb-4">
-              {hasCracks ? (
+              {hasDefects ? (
                 <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
                   <AlertTriangle className="w-6 h-6 text-red-400" />
                 </div>
@@ -99,9 +99,9 @@ export default function ResultsSection({ detection, imageFile, onReset }: Result
                 </div>
               )}
               <div>
-                <h3 className="text-lg font-semibold text-white">Detection Status</h3>
-                <p className={`text-2xl font-bold ${hasCracks ? 'text-red-400' : 'text-green-400'}`}>
-                  {hasCracks ? 'Cracks Found' : 'No Cracks'}
+                <h3 className="text-lg font-semibold text-white">Defect Status</h3>
+                <p className={`text-2xl font-bold ${hasDefects ? 'text-red-400' : 'text-green-400'}`}>
+                  {hasDefects ? 'Defects Found' : 'No Defects'}
                 </p>
               </div>
             </div>
@@ -109,7 +109,7 @@ export default function ResultsSection({ detection, imageFile, onReset }: Result
 
           <div className="bg-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700">
             <div className="mb-2">
-              <h3 className="text-sm text-gray-400">Window Type</h3>
+              <h3 className="text-sm text-gray-400">Product Type</h3>
               <p className="text-xl font-bold text-cyan-400 capitalize">
                 {detection.window_type || 'Unknown'}
               </p>
@@ -129,7 +129,7 @@ export default function ResultsSection({ detection, imageFile, onReset }: Result
           </div>
 
           <div className="bg-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700">
-            <h3 className="text-sm text-gray-400 mb-2">Issues Detected</h3>
+            <h3 className="text-sm text-gray-400 mb-2">Defects Detected</h3>
             <p className="text-4xl font-bold text-white mb-2">{detection.detection_result.cracks.length}</p>
             <p className="text-sm text-gray-400">
               {detection.detection_result.cracks.length === 0 ? 'No defects found' : 'Marked with bounding boxes'}
@@ -137,9 +137,9 @@ export default function ResultsSection({ detection, imageFile, onReset }: Result
           </div>
         </div>
 
-        {hasCracks && (
+        {hasDefects && (
           <div className="bg-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700 mb-8">
-            <h3 className="text-xl font-bold text-white mb-4">Detected Issues</h3>
+            <h3 className="text-xl font-bold text-white mb-4">Detected Defects</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {detection.detection_result.cracks.map((crack, idx) => (
                 <div key={idx} className="bg-slate-700/50 rounded-xl p-4 border border-slate-600">
@@ -171,7 +171,7 @@ export default function ResultsSection({ detection, imageFile, onReset }: Result
             <canvas ref={canvasRef} className="w-full h-auto" />
           </div>
           <p className="text-sm text-gray-400 mt-4">
-            {hasCracks ? 'Colored bounding boxes indicate detected cracks and damage' : 'No issues detected in this image'}
+            {hasDefects ? 'Colored bounding boxes indicate detected defects and damage' : 'No defects detected in this image'}
           </p>
         </div>
 

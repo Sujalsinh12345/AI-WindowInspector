@@ -59,5 +59,10 @@ CREATE POLICY "Anyone can view detections by id"
   TO anon, authenticated
   USING (true);
 
+CREATE POLICY "Anyone can delete detections by id"
+  ON crack_detections FOR DELETE
+  TO anon, authenticated
+  USING (true);
+
 CREATE INDEX IF NOT EXISTS idx_crack_detections_user_id ON crack_detections(user_id);
 CREATE INDEX IF NOT EXISTS idx_crack_detections_created_at ON crack_detections(created_at DESC);

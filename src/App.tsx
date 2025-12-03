@@ -4,14 +4,14 @@ import UploadSection from './components/UploadSection';
 import ResultsSection from './components/ResultsSection';
 import HistorySection from './components/HistorySection';
 import { analyzeWindowImage } from './services/aiDetection';
-import { supabase, CrackDetection } from './lib/supabase';
+import { supabase, DefectDetection } from './lib/supabase';
 
 type View = 'upload' | 'results' | 'history';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('upload');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [detection, setDetection] = useState<CrackDetection | null>(null);
+  const [detection, setDetection] = useState<DefectDetection | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,7 +49,7 @@ function App() {
             image_url: imageUrl,
             image_name: file.name,
             detection_result: result,
-            crack_detected: result.cracks.length > 0,
+            crack_detected: result.is_defective ?? (result.cracks.length > 0),
             window_type: result.window_type,
             confidence_score: result.overall_confidence,
           })
@@ -83,13 +83,13 @@ function App() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
                 <div className="w-5 h-5 border-2 border-white rounded" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                CrackDetect AI
-              </span>
+                <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                  Defect Detective - AI
+                </span>
             </div>
 
             <div className="flex gap-2">

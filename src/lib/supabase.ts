@@ -9,12 +9,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export type CrackDetection = {
+export type DefectDetection = {
   id: string;
   user_id: string | null;
   image_url: string;
   image_name: string;
   detection_result: {
+    is_window?: boolean;
+    non_window_reason?: string;
     cracks: Array<{
       type: string;
       severity: string;

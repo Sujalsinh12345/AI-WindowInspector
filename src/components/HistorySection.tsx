@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { History, AlertTriangle, CheckCircle, FileText } from 'lucide-react';
-import { supabase, CrackDetection } from '../lib/supabase';
+import { supabase, DefectDetection } from '../lib/supabase';
 import { generatePDFReport } from '../services/pdfGenerator';
 
 export default function HistorySection() {
-  const [detections, setDetections] = useState<CrackDetection[]>([]);
+  const [detections, setDetections] = useState<DefectDetection[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export default function HistorySection() {
           <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-2">
             Detection History
           </h2>
-          <p className="text-gray-400">View all previous window analyses</p>
+          <p className="text-gray-400">View all previous product defect analyses</p>
         </div>
 
         {detections.length === 0 ? (
@@ -58,7 +58,7 @@ export default function HistorySection() {
               <History className="w-12 h-12 text-gray-600" />
             </div>
             <h3 className="text-xl font-semibold text-gray-400 mb-2">No History Yet</h3>
-            <p className="text-gray-500">Upload and analyze window images to see them here</p>
+            <p className="text-gray-500">Upload and analyze product images to see them here</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -77,12 +77,12 @@ export default function HistorySection() {
                     {detection.crack_detected ? (
                       <div className="bg-red-500/90 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-2">
                         <AlertTriangle className="w-4 h-4 text-white" />
-                        <span className="text-white text-xs font-semibold">Cracks Found</span>
+                        <span className="text-white text-xs font-semibold">Defects Found</span>
                       </div>
                     ) : (
                       <div className="bg-green-500/90 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-white" />
-                        <span className="text-white text-xs font-semibold">No Issues</span>
+                        <span className="text-white text-xs font-semibold">No Defects</span>
                       </div>
                     )}
                   </div>
@@ -93,7 +93,7 @@ export default function HistorySection() {
 
                   <div className="space-y-2 mb-4">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">Window Type</span>
+                      <span className="text-gray-400">Product Type</span>
                       <span className="text-cyan-400 capitalize">{detection.window_type || 'Unknown'}</span>
                     </div>
                     <div className="flex justify-between text-sm">
@@ -101,7 +101,7 @@ export default function HistorySection() {
                       <span className="text-white font-semibold">{detection.confidence_score || 0}%</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">Issues Found</span>
+                      <span className="text-gray-400">Defects Found</span>
                       <span className="text-white font-semibold">{detection.detection_result.cracks.length}</span>
                     </div>
                   </div>

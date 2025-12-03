@@ -1,13 +1,13 @@
-import { CrackDetection } from '../lib/supabase';
+import { DefectDetection } from '../lib/supabase';
 
-export function generatePDFReport(detection: CrackDetection, imageDataUrl: string) {
+export function generatePDFReport(detection: DefectDetection, imageDataUrl: string) {
   const date = new Date(detection.created_at).toLocaleString();
-  const hasCracks = detection.crack_detected;
+  const hasDefects = detection.crack_detected;
 
   const content = `
     <div style="border-bottom: 3px solid #1e40af; padding-bottom: 20px; margin-bottom: 30px;">
-      <h1 style="margin: 0; color: #1e40af; font-size: 28px;">Window Crack Detection Report</h1>
-      <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">AI-Powered Analysis System</p>
+      <h1 style="margin: 0; color: #1e40af; font-size: 28px;">Product Defect Detection Report</h1>
+      <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">AI-Powered Inspection System</p>
     </div>
 
     <div style="margin-bottom: 30px;">
@@ -26,13 +26,13 @@ export function generatePDFReport(detection: CrackDetection, imageDataUrl: strin
           <td style="padding: 10px; border: 1px solid #ddd;">${detection.image_name}</td>
         </tr>
         <tr>
-          <td style="padding: 10px; border: 1px solid #ddd; background: #f8f9fa; font-weight: bold;">Window Type</td>
+          <td style="padding: 10px; border: 1px solid #ddd; background: #f8f9fa; font-weight: bold;">Product Type</td>
           <td style="padding: 10px; border: 1px solid #ddd;">${detection.window_type || 'N/A'}</td>
         </tr>
         <tr>
-          <td style="padding: 10px; border: 1px solid #ddd; background: #f8f9fa; font-weight: bold;">Cracks Detected</td>
-          <td style="padding: 10px; border: 1px solid #ddd; color: ${hasCracks ? '#dc2626' : '#16a34a'}; font-weight: bold;">
-            ${hasCracks ? 'YES' : 'NO'}
+          <td style="padding: 10px; border: 1px solid #ddd; background: #f8f9fa; font-weight: bold;">Defects Detected</td>
+          <td style="padding: 10px; border: 1px solid #ddd; color: ${hasDefects ? '#dc2626' : '#16a34a'}; font-weight: bold;">
+            ${hasDefects ? 'YES' : 'NO'}
           </td>
         </tr>
         <tr>
@@ -42,9 +42,9 @@ export function generatePDFReport(detection: CrackDetection, imageDataUrl: strin
       </table>
     </div>
 
-    ${hasCracks ? `
+    ${hasDefects ? `
       <div style="margin-bottom: 30px;">
-        <h2 style="color: #1e40af; font-size: 20px; margin-bottom: 15px;">Detected Issues</h2>
+        <h2 style="color: #1e40af; font-size: 20px; margin-bottom: 15px;">Detected Defects</h2>
         <table style="width: 100%; border-collapse: collapse;">
           <thead>
             <tr style="background: #1e40af; color: white;">
@@ -85,7 +85,7 @@ export function generatePDFReport(detection: CrackDetection, imageDataUrl: strin
     </div>
 
     <div style="margin-top: 50px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center; color: #666; font-size: 12px;">
-      <p>This report was generated automatically by AI Window Crack Detection System</p>
+      <p>This report was generated automatically by AI Product Defect Detection System</p>
       <p>© ${new Date().getFullYear()} - For professional use only</p>
     </div>
   `;
@@ -93,7 +93,7 @@ export function generatePDFReport(detection: CrackDetection, imageDataUrl: strin
   const reportWindow = window.open('', '_blank');
   if (!reportWindow) return;
 
-  const title = `Window_Report_${detection.id.slice(0, 8)}`;
+  const title = `Product_Report_${detection.id.slice(0, 8)}`;
 
   reportWindow.document.write(`
     <!DOCTYPE html>
