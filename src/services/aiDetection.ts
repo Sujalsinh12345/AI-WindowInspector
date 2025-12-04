@@ -16,6 +16,26 @@ export interface DetectionResult {
    * Stored in the "window_type" column in the database for compatibility.
    */
   window_type: string;
+  /**
+   * Detailed product type with full name (e.g., "fixed window", "bay window", "double hung window", "single door", etc.)
+   */
+  detailed_product_type: string;
+  /**
+   * Count of windows detected in the image
+   */
+  window_count: number;
+  /**
+   * Count of doors detected in the image
+   */
+  door_count: number;
+  /**
+   * List of specific window types detected (e.g., ["fixed window", "bay window"])
+   */
+  window_types: string[];
+  /**
+   * List of specific door types detected (e.g., ["single door", "double door"])
+   */
+  door_types: string[];
   overall_confidence: number;
   analysis: string;
   /**
@@ -50,7 +70,7 @@ export async function analyzeWindowImage(
         {
           parts: [
             {
-              text: `You are an expert inspection AI for building products such as windows, doors, frames, sliding systems, and glass panels. Analyze images for any visible defects and classify the product type.
+              text: `You are an expert inspection AI for building products such as windows, doors, frames, sliding systems, and glass panels. Analyze images for any visible defects and classify the product type with detailed specifications.
 
 Respond ONLY with valid JSON in this exact format:
 {
@@ -65,23 +85,41 @@ Respond ONLY with valid JSON in this exact format:
     }
   ],
   "window_type": "window|door|frame|sliding|glass_panel|other|unknown",
+  "detailed_product_type": "Full descriptive name like 'fixed window', 'bay window', 'double hung window', 'single door', 'french door', 'sliding glass door', etc.",
+  "window_count": 0-10,
+  "door_count": 0-10,
+  "window_types": ["array of specific window types detected, e.g., 'fixed window', 'bay window'"],
+  "door_types": ["array of specific door types detected, e.g., 'single door', 'double door'"],
   "overall_confidence": 0-100,
-  "analysis": "Brief description of findings, including whether the product is defective overall",
+  "analysis": "Brief description of findings, including whether the product is defective overall, and detailed counts/types of windows and doors",
   "is_defective": true|false
 }
 
 Location coordinates are percentages (0-100) of image dimensions. If no cracks found, return empty cracks array.
+
+For detailed_product_type, use full descriptive names:
+- Windows: "fixed window", "casement window", "double hung window", "single hung window", "sliding window", "bay window", "bow window", "picture window", "awning window", "hopper window", "tilt window"
+- Doors: "single door", "double door", "french door", "sliding glass door", "pocket door", "bifold door", "accordion door", "screen door", "storm door"
+- Frames: "window frame", "door frame", "aluminum frame", "wood frame", "vinyl frame"
+- Other: "sliding glass panel", "glass railing", "skylight", "transom window"
+
+Count windows and doors visible in the image and list their specific types in the respective arrays.
 
 If the image does NOT contain a relevant product (for example: random objects, people, scenery, documents, etc.), then:
 - Set "is_window" to false
 - Set "non_window_reason" to a short explanation
 - Set "cracks" to an empty array
 - Set "window_type" to "unknown"
+- Set "detailed_product_type" to "unknown"
+- Set "window_count" to 0
+- Set "door_count" to 0
+- Set "window_types" to []
+- Set "door_types" to []
 - Set "overall_confidence" to 0
 - Set "analysis" to a short sentence explaining that no relevant product was detected.
 - Set "is_defective" to false.
 
-Now analyze this image for defects, classify the product type (window/door/frame/sliding/glass panel/etc.), and decide if the product is defective overall. Provide bounding box coordinates for any defects found.`
+Now analyze this image for defects, classify the product type with full detailed names, count windows and doors, and decide if the product is defective overall. Provide bounding box coordinates for any defects found.`
             },
             {
               inlineData: {

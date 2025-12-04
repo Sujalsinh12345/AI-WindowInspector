@@ -108,12 +108,33 @@ export default function ResultsSection({ detection, imageFile, onReset }: Result
           </div>
 
           <div className="bg-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700">
-            <div className="mb-2">
+            <div className="mb-4">
               <h3 className="text-sm text-gray-400">Product Type</h3>
               <p className="text-xl font-bold text-cyan-400 capitalize">
-                {detection.window_type || 'Unknown'}
+                {detection.detection_result.detailed_product_type || detection.window_type || 'Unknown'}
               </p>
             </div>
+
+            {(detection.detection_result.window_count > 0 || detection.detection_result.door_count > 0) && (
+              <div className="mb-4">
+                <h3 className="text-sm text-gray-400 mb-2">Product Count</h3>
+                <div className="flex gap-4">
+                  {detection.detection_result.window_count > 0 && (
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-blue-400">{detection.detection_result.window_count}</p>
+                      <p className="text-xs text-gray-400">Window{detection.detection_result.window_count !== 1 ? 's' : ''}</p>
+                    </div>
+                  )}
+                  {detection.detection_result.door_count > 0 && (
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-green-400">{detection.detection_result.door_count}</p>
+                      <p className="text-xs text-gray-400">Door{detection.detection_result.door_count !== 1 ? 's' : ''}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div>
               <h3 className="text-sm text-gray-400">Confidence Score</h3>
               <div className="flex items-center gap-3 mt-2">
@@ -136,6 +157,38 @@ export default function ResultsSection({ detection, imageFile, onReset }: Result
             </p>
           </div>
         </div>
+
+        {(detection.detection_result.window_types?.length > 0 || detection.detection_result.door_types?.length > 0) && (
+          <div className="bg-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700 mb-8">
+            <h3 className="text-xl font-bold text-white mb-4">Product Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {detection.detection_result.window_types?.length > 0 && (
+                <div>
+                  <h4 className="text-lg font-semibold text-blue-400 mb-3">Windows Detected</h4>
+                  <div className="space-y-2">
+                    {detection.detection_result.window_types.map((type, idx) => (
+                      <div key={idx} className="bg-slate-700/50 rounded-lg p-3 border border-slate-600">
+                        <span className="text-white capitalize">{type}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {detection.detection_result.door_types?.length > 0 && (
+                <div>
+                  <h4 className="text-lg font-semibold text-green-400 mb-3">Doors Detected</h4>
+                  <div className="space-y-2">
+                    {detection.detection_result.door_types.map((type, idx) => (
+                      <div key={idx} className="bg-slate-700/50 rounded-lg p-3 border border-slate-600">
+                        <span className="text-white capitalize">{type}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {hasDefects && (
           <div className="bg-slate-800/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-700 mb-8">

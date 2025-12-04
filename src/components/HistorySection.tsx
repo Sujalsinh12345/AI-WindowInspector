@@ -94,8 +94,18 @@ export default function HistorySection() {
                   <div className="space-y-2 mb-4">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">Product Type</span>
-                      <span className="text-cyan-400 capitalize">{detection.window_type || 'Unknown'}</span>
+                      <span className="text-cyan-400 capitalize">{detection.detection_result.detailed_product_type || detection.window_type || 'Unknown'}</span>
                     </div>
+                    {(detection.detection_result.window_count > 0 || detection.detection_result.door_count > 0) && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-400">Count</span>
+                        <span className="text-blue-400">
+                          {detection.detection_result.window_count > 0 && `${detection.detection_result.window_count}W`}
+                          {detection.detection_result.window_count > 0 && detection.detection_result.door_count > 0 && ' '}
+                          {detection.detection_result.door_count > 0 && `${detection.detection_result.door_count}D`}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">Confidence</span>
                       <span className="text-white font-semibold">{detection.confidence_score || 0}%</span>

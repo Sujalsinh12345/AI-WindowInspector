@@ -1,5 +1,6 @@
-import { Upload, Scan } from 'lucide-react';
+import { Upload, Scan, Link, Folder } from 'lucide-react';
 import { useRef, useState } from 'react';
+import BatchImageSelector from './BatchImageSelector';
 
 interface UploadSectionProps {
   onImageSelect: (file: File) => void;
@@ -9,6 +10,13 @@ interface UploadSectionProps {
 export default function UploadSection({ onImageSelect, isAnalyzing }: UploadSectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
+  const [folderUrl, setFolderUrl] = useState('');
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [showFolderInput, setShowFolderInput] = useState(false);
+  const [showBatchSelector, setShowBatchSelector] = useState(false);
+  const [isLoadingUrl, setIsLoadingUrl] = useState(false);
+  const [isLoadingFolder, setIsLoadingFolder] = useState(false);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -33,6 +41,112 @@ export default function UploadSection({ onImageSelect, isAnalyzing }: UploadSect
     const file = e.target.files?.[0];
     if (file) {
       onImageSelect(file);
+    }
+  };
+
+  const handleUrlSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!imageUrl.trim()) return;
+
+    setIsLoadingUrl(true);
+    try {
+      let finalUrl = imageUrl;
+
+      // Handle different cloud storage services
+      if (imageUrl.includes('drive.google.com') && imageUrl.includes('/file/d/')) {
+        // Google Drive
+        const fileIdMatch = imageUrl.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
+        if (fileIdMatch) {
+          const fileId = fileIdMatch[1];
+          finalUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+        }
+      } else if (imageUrl.includes('dropbox.com') && imageUrl.includes('/s/')) {
+        // Dropbox sharing link
+        finalUrl = imageUrl.replace('?dl=0', '?dl=1').replace(/$/, imageUrl.includes('?') ? '&dl=1' : '?dl=1');
+      } else if (imageUrl.includes('dropbox.com') && imageUrl.includes('/scl/fi/')) {
+        // Dropbox direct link
+        finalUrl = imageUrl.replace('?rlkey=', '?raw=1&rlkey=');
+      } else if (imageUrl.includes('sharepoint.com') || imageUrl.includes('onedrive.live.com') || imageUrl.includes('1drv.ms')) {
+        // SharePoint/OneDrive - try to convert to download link
+        if (imageUrl.includes('/_layouts/')) {
+          // Already a download link
+          finalUrl = imageUrl;
+        } else {
+          // Try to construct download URL
+          finalUrl = imageUrl.replace('/redir?', '/download.aspx?').replace('onedrive.live.com/redir?', 'onedrive.live.com/download.aspx?');
+        }
+      }
+
+      const response = await fetch(finalUrl, {
+        headers: {
+          'Accept': 'image/*',
+        }
+      });
+
+      if (!response.ok) {
+        // If thumbnail fails, try direct download for Google Drive
+        if (imageUrl.includes('drive.google.com') && finalUrl.includes('thumbnail')) {
+          const fileIdMatch = imageUrl.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
+          if (fileIdMatch) {
+            const fileId = fileIdMatch[1];
+            const backupResponse = await fetch(`https://drive.google.com/uc?export=download&id=${fileId}`);
+            if (backupResponse.ok) {
+              const blob = await backupResponse.blob();
+              const file = new File([blob], `drive_image.${blob.type.split('/')[1] || 'jpg'}`, { type: blob.type });
+              onImageSelect(file);
+              setImageUrl('');
+              setShowUrlInput(false);
+              setIsLoadingUrl(false);
+              return;
+            }
+          }
+        }
+        throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+      }
+
+      const blob = await response.blob();
+
+      // Validate that we got an image
+      if (!blob.type.startsWith('image/')) {
+        throw new Error('URL does not point to a valid image file');
+      }
+
+      const file = new File([blob], `image_from_url.${blob.type.split('/')[1] || 'jpg'}`, { type: blob.type });
+      onImageSelect(file);
+      setImageUrl('');
+      setShowUrlInput(false);
+    } catch (error) {
+      console.error('Error loading image from URL:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      let userMessage = `Failed to load image from URL: ${errorMessage}`;
+
+      if (imageUrl.includes('drive.google.com')) {
+        userMessage += '\n\nFor Google Drive images:\n• Make sure the file is publicly shared ("Anyone with the link can view")\n• Copy the complete sharing link\n• Try using "Batch URLs" option instead';
+      } else if (imageUrl.includes('dropbox.com')) {
+        userMessage += '\n\nFor Dropbox images:\n• Use sharing links that end with ?dl=0\n• The app will convert them automatically\n• Make sure the link is accessible';
+      } else if (imageUrl.includes('sharepoint.com') || imageUrl.includes('onedrive.live.com')) {
+        userMessage += '\n\nFor OneDrive/SharePoint images:\n• Use direct download links when possible\n• Make sure the file is shared appropriately\n• Try different link formats if one doesn\'t work';
+      }
+
+      alert(userMessage + '\n\nPlease check the URL and try again.');
+    } finally {
+      setIsLoadingUrl(false);
+    }
+  };
+
+  const handleFolderSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setIsLoadingFolder(true);
+    try {
+      // For bulk URL processing, we don't need validation
+      setShowFolderInput(false);
+      setShowBatchSelector(true);
+    } catch (error) {
+      console.error('Error:', error);
+      alert(error instanceof Error ? error.message : 'Failed. Please try again.');
+    } finally {
+      setIsLoadingFolder(false);
     }
   };
 
@@ -103,12 +217,94 @@ export default function UploadSection({ onImageSelect, isAnalyzing }: UploadSect
                     Drag & drop your product image here, or click to browse
                   </p>
 
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-semibold text-lg hover:from-blue-500 hover:to-cyan-500 transform hover:scale-105 transition-all duration-300 shadow-2xl shadow-cyan-500/50"
-                  >
-                    Select Image
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-semibold hover:from-blue-500 hover:to-cyan-500 transform hover:scale-105 transition-all duration-300 shadow-2xl shadow-cyan-500/50 flex items-center gap-2"
+                    >
+                      <Upload className="w-5 h-5" />
+                      Select Image
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setShowUrlInput(!showUrlInput);
+                        setShowFolderInput(false); // Close the other form
+                      }}
+                      className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-500 hover:to-pink-500 transform hover:scale-105 transition-all duration-300 shadow-2xl shadow-pink-500/50 flex items-center gap-2"
+                    >
+                      <Link className="w-5 h-5" />
+                      From URL
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setShowFolderInput(!showFolderInput);
+                        setShowUrlInput(false); // Close the other form
+                      }}
+                      className="px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-xl font-semibold hover:from-green-500 hover:to-teal-500 transform hover:scale-105 transition-all duration-300 shadow-2xl shadow-teal-500/50 flex items-center gap-2"
+                    >
+                      <Folder className="w-5 h-5" />
+                      Batch URLs
+                    </button>
+                  </div>
+
+                  {showUrlInput && (
+                    <form onSubmit={handleUrlSubmit} className="mt-6 p-4 bg-slate-700/50 rounded-xl border border-slate-600">
+                      <div className="flex gap-3">
+                        <input
+                          type="url"
+                          value={imageUrl}
+                          onChange={(e) => setImageUrl(e.target.value)}
+                          placeholder="Enter image URL or Google Drive sharing link..."
+                          className="flex-1 px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400"
+                          disabled={isLoadingUrl}
+                        />
+                        <button
+                          type="submit"
+                          disabled={isLoadingUrl || !imageUrl.trim()}
+                          className="px-6 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg font-semibold hover:from-cyan-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                          {isLoadingUrl ? (
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Scan className="w-4 h-4" />
+                          )}
+                          Load
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  {showFolderInput && (
+                    <form onSubmit={handleFolderSubmit} className="mt-6 p-4 bg-slate-700/50 rounded-xl border border-slate-600">
+                      <div className="flex gap-3">
+                        <input
+                          type="text"
+                          value={folderUrl}
+                          onChange={(e) => setFolderUrl(e.target.value)}
+                          placeholder="Optional: Enter folder URL or leave empty for bulk URL input..."
+                          className="flex-1 px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-teal-400"
+                          disabled={isLoadingFolder}
+                        />
+                        <button
+                          type="submit"
+                          disabled={isLoadingFolder || !folderUrl.trim()}
+                          className="px-6 py-2 bg-gradient-to-r from-teal-600 to-green-600 text-white rounded-lg font-semibold hover:from-teal-500 hover:to-green-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                          {isLoadingFolder ? (
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Folder className="w-4 h-4" />
+                          )}
+                          Process
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-2">
+                        Note: Paste multiple image URLs (one per line) to analyze them one by one
+                      </p>
+                    </form>
+                  )}
 
                   <p className="text-sm text-gray-500 mt-6">
                     Supports: JPG, PNG, WebP • Max size: 10MB
@@ -139,6 +335,21 @@ export default function UploadSection({ onImageSelect, isAnalyzing }: UploadSect
           ))}
         </div>
       </div>
+
+      {showBatchSelector && (
+        <BatchImageSelector
+          folderUrl={folderUrl || undefined}
+          onImageSelect={(file) => {
+            onImageSelect(file);
+            setShowBatchSelector(false);
+            setFolderUrl('');
+          }}
+          onClose={() => {
+            setShowBatchSelector(false);
+            setFolderUrl('');
+          }}
+        />
+      )}
     </div>
   );
 }

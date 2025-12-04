@@ -27,8 +27,28 @@ export function generatePDFReport(detection: DefectDetection, imageDataUrl: stri
         </tr>
         <tr>
           <td style="padding: 10px; border: 1px solid #ddd; background: #f8f9fa; font-weight: bold;">Product Type</td>
-          <td style="padding: 10px; border: 1px solid #ddd;">${detection.window_type || 'N/A'}</td>
+          <td style="padding: 10px; border: 1px solid #ddd;">${detection.detection_result.detailed_product_type || detection.window_type || 'N/A'}</td>
         </tr>
+        ${detection.detection_result.window_count > 0 || detection.detection_result.door_count > 0 ? `
+        <tr>
+          <td style="padding: 10px; border: 1px solid #ddd; background: #f8f9fa; font-weight: bold;">Product Count</td>
+          <td style="padding: 10px; border: 1px solid #ddd;">
+            ${detection.detection_result.window_count > 0 ? `${detection.detection_result.window_count} Window${detection.detection_result.window_count !== 1 ? 's' : ''}` : ''}
+            ${detection.detection_result.window_count > 0 && detection.detection_result.door_count > 0 ? ', ' : ''}
+            ${detection.detection_result.door_count > 0 ? `${detection.detection_result.door_count} Door${detection.detection_result.door_count !== 1 ? 's' : ''}` : ''}
+          </td>
+        </tr>
+        ` : ''}
+        ${detection.detection_result.window_types?.length > 0 || detection.detection_result.door_types?.length > 0 ? `
+        <tr>
+          <td style="padding: 10px; border: 1px solid #ddd; background: #f8f9fa; font-weight: bold;">Specific Types</td>
+          <td style="padding: 10px; border: 1px solid #ddd;">
+            ${detection.detection_result.window_types?.length > 0 ? `Windows: ${detection.detection_result.window_types.join(', ')}` : ''}
+            ${detection.detection_result.window_types?.length > 0 && detection.detection_result.door_types?.length > 0 ? '<br>' : ''}
+            ${detection.detection_result.door_types?.length > 0 ? `Doors: ${detection.detection_result.door_types.join(', ')}` : ''}
+          </td>
+        </tr>
+        ` : ''}
         <tr>
           <td style="padding: 10px; border: 1px solid #ddd; background: #f8f9fa; font-weight: bold;">Defects Detected</td>
           <td style="padding: 10px; border: 1px solid #ddd; color: ${hasDefects ? '#dc2626' : '#16a34a'}; font-weight: bold;">

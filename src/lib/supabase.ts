@@ -24,8 +24,14 @@ export type DefectDetection = {
       confidence: number;
     }>;
     window_type: string;
+    detailed_product_type: string;
+    window_count: number;
+    door_count: number;
+    window_types: string[];
+    door_types: string[];
     overall_confidence: number;
     analysis: string;
+    is_defective?: boolean;
   };
   crack_detected: boolean;
   window_type: string | null;
